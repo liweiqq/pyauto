@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Pilot - 股票工具平台</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Stock Pilot</h1>
+    <p>股票查询 / 暗盘信息 / 个股分析 / 暗盘历史 / 移动清单</p>
+  </header>
+
+  <main>
+    <section class="card search-panel">
+      <label for="stockInput">股票代码或名称</label>
+      <div class="search-row">
+        <input id="stockInput" placeholder="例如：00700、腾讯、AAPL" />
+        <button id="searchBtn">查询</button>
+      </div>
+      <small>内置演示数据，可按需接入真实行情 API（港股/美股/A 股）</small>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="quote">股票查询</button>
+      <button class="tab" data-tab="grey">暗盘信息</button>
+      <button class="tab" data-tab="analysis">个股分析</button>
+      <button class="tab" data-tab="history">暗盘历史</button>
+      <button class="tab" data-tab="watchlist">移动清单</button>
+    </nav>
+
+    <section id="quote" class="card tab-content active"></section>
+    <section id="grey" class="card tab-content"></section>
+    <section id="analysis" class="card tab-content"></section>
+    <section id="history" class="card tab-content"></section>
+    <section id="watchlist" class="card tab-content"></section>
+  </main>
+
+  <footer>
+    <p>⚠️ 本站仅做学习演示，不构成投资建议。</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
