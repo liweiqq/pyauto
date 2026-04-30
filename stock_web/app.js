@@ -106,6 +106,23 @@ function renderWatchlist() {
   });
 }
 
+
+function createSyntheticStock(code) {
+  const seed = [...code].reduce((n, c) => n + c.charCodeAt(0), 0);
+  const price = +(20 + (seed % 300) + ((seed % 17) / 10)).toFixed(2);
+  const changePct = +((((seed % 15) - 7) / 3).toFixed(2));
+  const market = /^\d{5,6}$/.test(code) ? "HK" : (/^[A-Z]{1,5}$/.test(code) ? "US" : "CN");
+  return {
+    name: `${code}（自动生成）`,
+    market,
+    price,
+    changePct,
+    pe: +(8 + (seed % 35)).toFixed(1),
+    pb: +(0.8 + (seed % 60) / 10).toFixed(1),
+    cap: "模拟数据"
+  };
+}
+
 function renderAll() {
   const stock = stockDB[current];
   renderQuote(stock);
@@ -126,10 +143,20 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 document.getElementById("searchBtn").onclick = () => {
   const q = document.getElementById("stockInput").value.trim().toUpperCase();
-  const found = Object.entries(stockDB).find(([code, s]) => code === q || s.name.includes(q));
-  if (!found) return alert("未找到该股票，当前为演示库。可在 app.js 扩充数据或接入 API。");
-  current = found[0];
+  if (!q) return;
+  const found = Object.entries(stockDB).find(([code, s]) => code === q || s.name.toUpperCase().includes(q));
+  if (found) {
+    current = found[0];
+    renderAll();
+    return;
+  }
+
+  if (!stockDB[q]) {
+    stockDB[q] = createSyntheticStock(q);
+  }
+  current = q;
   renderAll();
+  alert(`未收录 ${q} 的实时数据，已为你生成可浏览的模拟数据。你可以后续接入真实 API。`);
 };
 
 renderAll();
