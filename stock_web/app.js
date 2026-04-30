@@ -11,6 +11,57 @@ const greyMarketDB = {
 };
 
 let current = "00700";
+
+const REALTIME_ENABLED = true;
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
+function toStooqSymbol(input) {
+  const code = input.trim().toLowerCase();
+  if (/^\d{5}$/.test(code)) return `${code}.hk`;
+  if (/^\d{6}$/.test(code)) return `${code}.hk`;
+  if (/^[a-z]{1,5}$/.test(code)) return `${code}.us`;
+  if (/^(sh|sz)\d{6}$/.test(code)) return `${code}`;
+  return code;
+}
+
+async function fetchRealtimeStock(query) {
+  if (!REALTIME_ENABLED) return null;
+  const symbol = toStooqSymbol(query.toUpperCase());
+  const target = `https://stooq.com/q/l/?s=${encodeURIComponent(symbol)}&f=sd2t2ohlcvn&h&e=csv`;
+  const url = `${CORS_PROXY}${encodeURIComponent(target)}`;
+
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const text = (await res.text()).trim();
+    const lines = text.split(/?
+/);
+    if (lines.length < 2) return null;
+    const cols = lines[1].split(",");
+    if (!cols[0] || cols[0].toLowerCase() === "no_data") return null;
+
+    const close = Number(cols[6]);
+    const open = Number(cols[4]);
+    const pct = Number.isFinite(close) && Number.isFinite(open) && open !== 0
+      ? +(((close - open) / open) * 100).toFixed(2)
+      : 0;
+
+    return {
+      code: query.toUpperCase(),
+      name: cols[8] || `${query.toUpperCase()}（实时）`,
+      market: symbol.endsWith('.hk') ? 'HK' : (symbol.endsWith('.us') ? 'US' : 'CN'),
+      price: Number.isFinite(close) ? close : 0,
+      changePct: pct,
+      pe: "--",
+      pb: "--",
+      cap: "实时接口"
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+
 const quoteEl = document.getElementById("quote");
 const greyEl = document.getElementById("grey");
 const analysisEl = document.getElementById("analysis");
@@ -141,9 +192,10 @@ document.querySelectorAll(".tab").forEach(tab => {
   };
 });
 
-document.getElementById("searchBtn").onclick = () => {
+document.getElementById("searchBtn").onclick = async () => {
   const q = document.getElementById("stockInput").value.trim().toUpperCase();
   if (!q) return;
+
   const found = Object.entries(stockDB).find(([code, s]) => code === q || s.name.toUpperCase().includes(q));
   if (found) {
     current = found[0];
@@ -151,12 +203,19 @@ document.getElementById("searchBtn").onclick = () => {
     return;
   }
 
-  if (!stockDB[q]) {
-    stockDB[q] = createSyntheticStock(q);
+  const realtime = await fetchRealtimeStock(q);
+  if (realtime) {
+    stockDB[q] = realtime;
+    current = q;
+    renderAll();
+    alert(`已接入实时接口查询 ${q}。若行情存在延迟，以交易所数据为准。`);
+    return;
   }
+
+  if (!stockDB[q]) stockDB[q] = createSyntheticStock(q);
   current = q;
   renderAll();
-  alert(`未收录 ${q} 的实时数据，已为你生成可浏览的模拟数据。你可以后续接入真实 API。`);
+  alert(`未获取到 ${q} 的实时结果，已为你生成可浏览的模拟数据。你可以检查网络或稍后重试。`);
 };
 
 renderAll();
