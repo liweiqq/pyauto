@@ -31,6 +31,30 @@ cd pyauto/stock_web
 ./run_local.sh 8080
 ```
 
+
+### 方式三：Windows（CMD / PowerShell）
+
+1. 下载并安装 Python（安装时勾选 `Add python.exe to PATH`）。
+2. 打开 `cmd` 或 PowerShell，进入目录：
+
+```powershell
+cd pyauto\stock_web
+```
+
+3. 启动：
+
+```powershell
+run_local.bat 8080
+```
+
+4. 浏览器访问：`http://127.0.0.1:8080`
+
+如果你不想用 `.bat`，也可以直接执行：
+
+```powershell
+python -m http.server 8080
+```
+
 ## 不使用脚本的运行方式
 
 ```bash
