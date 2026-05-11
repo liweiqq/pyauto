@@ -1,0 +1,11 @@
+vcenters:
+  prod-vcenter:
+    host: 10.10.10.10
+    username: administrator@vsphere.local
+    password: ENC(change_me)
+    datacenter: PROD-DC
+  test-vcenter:
+    host: 10.20.20.20
+    username: administrator@vsphere.local
+    password: ENC(change_me)
+    datacenter: TEST-DC
