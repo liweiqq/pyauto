@@ -1,0 +1,13 @@
+templates:
+  centos7-template:
+    os_type: linux
+    username: root
+    password: ENC(change_me)
+  ubuntu22-template:
+    os_type: linux
+    username: ubuntu
+    password: ENC(change_me)
+  win2019-template:
+    os_type: windows
+    username: Administrator
+    password: ENC(change_me)
